@@ -58,6 +58,16 @@ export const colors = {
   info: '#3B82F6',
   infoLight: 'rgba(59, 130, 246, 0.15)',
 
+  // Dietary badges - food-specific colors
+  vegan: '#10B981',
+  veganLight: 'rgba(16, 185, 129, 0.15)',
+  vegetarian: '#22C55E',
+  vegetarianLight: 'rgba(34, 197, 94, 0.15)',
+  spicy: '#F97316',
+  spicyLight: 'rgba(249, 115, 22, 0.15)',
+  glutenFree: '#3B82F6',
+  glutenFreeLight: 'rgba(59, 130, 246, 0.15)',
+
   // Gradients - for premium effects
   gradientStart: '#F5A623',
   gradientEnd: '#E86F4A',

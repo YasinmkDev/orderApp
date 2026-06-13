@@ -29,6 +29,13 @@ export interface Item {
   isFeatured?: boolean;
   sku?: string;
   unit?: string;
+  // Food-specific fields
+  restaurantName?: string;
+  shortDescription?: string;
+  dietaryTags?: ('vegan' | 'vegetarian' | 'spicy' | 'glutenFree')[];
+  deliveryTime?: number; // in minutes
+  rating?: number;
+  reviewCount?: number;
 }
 
 export interface Category {

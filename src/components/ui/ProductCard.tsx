@@ -12,7 +12,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, borderRadius, spacing, shadows, springs } from '../../theme';
 import { Text } from './Text';
 import { Image } from 'expo-image';
-import { Star, Heart } from 'lucide-react-native';
+import { Star, Heart, Clock } from 'lucide-react-native';
+import { DietaryBadge } from './DietaryBadge';
 
 interface ProductCardProps {
   id: string;
@@ -26,6 +27,11 @@ interface ProductCardProps {
   isFeatured?: boolean;
   isFavorite?: boolean;
   onPress: (id: string) => void;
+  // Food-specific props
+  restaurantName?: string;
+  shortDescription?: string;
+  dietaryTags?: ('vegan' | 'vegetarian' | 'spicy' | 'glutenFree')[];
+  deliveryTime?: number;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -42,6 +48,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isFeatured,
   isFavorite,
   onPress,
+  restaurantName,
+  shortDescription,
+  dietaryTags,
+  deliveryTime,
 }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
@@ -70,6 +80,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  const isFood = restaurantName !== undefined;
 
   return (
     <AnimatedPressable
@@ -103,26 +114,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           />
         </Animated.View>
 
-        {/* Badges */}
-        {isFeatured && (
-          <View style={styles.featuredBadge}>
-            <LinearGradient
-              colors={[colors.primary, colors.secondary]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.featuredBadgeGradient}
-            >
-              <Text variant="captionSmall" color="primary" weight="semibold">
-                Featured
-              </Text>
-            </LinearGradient>
+        {/* Top-Left Badge (Dietary tag) */}
+        {isFood && dietaryTags && dietaryTags.length > 0 && (
+          <View style={styles.dietaryBadgeContainer}>
+            <DietaryBadge tags={dietaryTags} size="sm" />
           </View>
         )}
 
-        {discount > 0 && (
-          <View style={styles.discountBadge}>
-            <Text variant="captionSmall" weight="bold" style={{ color: colors.white }}>
-              -{discount}%
+        {/* Top-Right Badge (Delivery time) */}
+        {isFood && deliveryTime !== undefined && (
+          <View style={styles.deliveryTimeBadge}>
+            <Clock size={12} color={colors.white} />
+            <Text variant="captionSmall" color="white" weight="semibold">
+              {deliveryTime}m
             </Text>
           </View>
         )}
@@ -139,11 +143,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Content Section */}
       <View style={styles.content}>
-        {category && (
+        {/* Restaurant Name (Food-specific) */}
+        {restaurantName && (
           <Text variant="captionSmall" color="secondary">
-            {category}
+            {restaurantName}
           </Text>
         )}
+
+        {/* Dish Name */}
         <Text
           variant="titleMedium"
           numberOfLines={2}
@@ -152,31 +159,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {name}
         </Text>
 
-        {/* Rating */}
-        {rating !== undefined && (
-          <View style={styles.ratingRow}>
-            <Star size={12} color={colors.primary} fill={colors.primary} />
-            <Text variant="caption" color="brand" weight="semibold">
-              {rating.toFixed(1)}
-            </Text>
-            {reviewCount !== undefined && (
-              <Text variant="caption" color="tertiary">
-                ({reviewCount})
-              </Text>
-            )}
+        {/* Description (Food-specific) */}
+        {shortDescription && (
+          <Text 
+            variant="bodySmall" 
+            color="tertiary" 
+            numberOfLines={1}
+            style={styles.description}
+          >
+            {shortDescription}
+          </Text>
+        )}
+
+        {/* Dietary Tags (Food-specific) */}
+        {isFood && dietaryTags && dietaryTags.length > 0 && (
+          <View style={styles.dietaryTagsContainer}>
+            <DietaryBadge tags={dietaryTags} size="sm" />
           </View>
         )}
 
-        {/* Price */}
-        <View style={styles.priceRow}>
+        {/* Rating + Price Row */}
+        <View style={styles.footerRow}>
+          {rating !== undefined && (
+            <View style={styles.ratingRow}>
+              <Star size={12} color={colors.primary} fill={colors.primary} />
+              <Text variant="caption" color="brand" weight="semibold">
+                {rating.toFixed(1)}
+              </Text>
+              {reviewCount !== undefined && (
+                <Text variant="caption" color="tertiary">
+                  ({reviewCount})
+                </Text>
+              )}
+            </View>
+          )}
+
           <Text variant="price" color="brand">
             ${price.toFixed(2)}
           </Text>
-          {originalPrice && (
-            <Text variant="bodySmall" color="tertiary" style={styles.originalPrice}>
-              ${originalPrice.toFixed(2)}
-            </Text>
-          )}
         </View>
       </View>
     </AnimatedPressable>
@@ -198,7 +218,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 160,
+    height: 200,
     backgroundColor: colors.surfaceElevated,
     overflow: 'hidden',
   },
@@ -218,25 +238,22 @@ const styles = StyleSheet.create({
     right: 0,
     height: 60,
   },
-  featuredBadge: {
+  dietaryBadgeContainer: {
     position: 'absolute',
     top: spacing.sm,
     left: spacing.sm,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
   },
-  featuredBadgeGradient: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-  },
-  discountBadge: {
+  deliveryTimeBadge: {
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
-    backgroundColor: colors.error,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.xxs,
-    borderRadius: borderRadius.xs,
+    borderRadius: borderRadius.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxxs,
   },
   favoriteButton: {
     position: 'absolute',
@@ -257,19 +274,21 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxs,
     minHeight: 40,
   },
+  description: {
+    marginTop: spacing.xs,
+  },
+  dietaryTagsContainer: {
+    marginTop: spacing.xs,
+  },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxxs,
-    marginTop: spacing.xxs,
   },
-  priceRow: {
+  footerRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  originalPrice: {
-    textDecorationLine: 'line-through',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
   },
 });

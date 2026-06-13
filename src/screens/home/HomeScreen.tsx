@@ -74,10 +74,10 @@ const HeroSection: React.FC<{
               <Text variant="caption" color="primary">Good evening</Text>
             </View>
             <Text variant="display" color="primary" style={styles.heroTitle}>
-              Hey, {customerName || 'there'}!
+              What are you hungry for?
             </Text>
             <Text variant="bodyLarge" color="primary" style={styles.heroSubtitle}>
-              Discover amazing products just for you
+              Explore delicious dishes from your favorite restaurants
             </Text>
           </Animated.View>
 
@@ -288,9 +288,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
                     imageUri={product.image}
                     category={product.categoryName}
                     isFeatured={product.isFeatured}
-                    rating={4.5 + Math.random() * 0.4}
-                    reviewCount={Math.floor(Math.random() * 200) + 50}
+                    rating={product.rating || 4.5 + Math.random() * 0.4}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 200) + 50}
                     onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
                   />
                 </Animated.View>
               ))}
@@ -319,9 +323,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
                     price={product.price}
                     imageUri={product.image}
                     category={product.categoryName}
-                    rating={4.3 + Math.random() * 0.6}
-                    reviewCount={Math.floor(Math.random() * 150) + 30}
+                    rating={product.rating || 4.3 + Math.random() * 0.6}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 150) + 30}
                     onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
                   />
                 </Animated.View>
               ))}
@@ -354,9 +362,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
                     price={product.price}
                     imageUri={product.image}
                     category={product.categoryName}
-                    rating={4.2 + Math.random() * 0.7}
-                    reviewCount={Math.floor(Math.random() * 100) + 20}
+                    rating={product.rating || 4.2 + Math.random() * 0.7}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 100) + 20}
                     onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
                   />
                 </Animated.View>
               ))}

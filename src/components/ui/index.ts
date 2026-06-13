@@ -7,6 +7,7 @@ export { Avatar } from './Avatar';
 export { Modal } from './Modal';
 export { BottomSheet } from './BottomSheet';
 export { ProductCard } from './ProductCard';
+export { DietaryBadge } from './DietaryBadge';
 export { SectionHeader } from './SectionHeader';
 export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
