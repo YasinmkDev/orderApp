@@ -24,6 +24,8 @@ import Animated, {
 import { theme, colors, spacing, borderRadius, shadows } from '../../theme';
 import { Text } from '../../components/ui/Text';
 import { ProductCard } from '../../components/ui/ProductCard';
+import { CompactProductCard } from '../../components/ui/CompactProductCard';
+import { FeaturedCarouselHero } from '../../components/ui/FeaturedCarouselHero';
 import { HomeScreenSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useProducts, useCategories } from '../../hooks';
@@ -44,11 +46,71 @@ interface Props {
 // Animated components
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-// Hero Section Component
+// Hero Section Component - Carousel-based
 const HeroSection: React.FC<{
   onSearchPress: () => void;
   customerName: string;
 }> = ({ onSearchPress, customerName }) => {
+  // Default carousel items
+  const carouselItems = [
+    {
+      id: 'hero-1',
+      image: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Trattoria Roma',
+      dishName: 'Spicy Thai Basil',
+      rating: 4.8,
+      reviewCount: 342,
+      deliveryTime: 25,
+      tags: ['Spicy', 'Popular'],
+    },
+    {
+      id: 'hero-2',
+      image: 'https://images.pexels.com/photos/2082063/pexels-photo-2082063.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Pasta Paradise',
+      dishName: 'Margherita Pizza',
+      rating: 4.9,
+      reviewCount: 521,
+      deliveryTime: 30,
+      tags: ['Vegetarian', 'Fresh'],
+    },
+    {
+      id: 'hero-3',
+      image: 'https://images.pexels.com/photos/821365/pexels-photo-821365.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Green Haven',
+      dishName: 'Buddha Bowl',
+      rating: 4.7,
+      reviewCount: 218,
+      deliveryTime: 20,
+      tags: ['Vegan', 'Healthy'],
+    },
+    {
+      id: 'hero-4',
+      image: 'https://images.pexels.com/photos/3535149/pexels-photo-3535149.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Ocean Blue',
+      dishName: 'Grilled Salmon',
+      rating: 4.9,
+      reviewCount: 467,
+      deliveryTime: 35,
+      tags: ['Premium', 'Fresh'],
+    },
+  ];
+
+  return (
+    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.heroSection}>
+      {/* Featured Carousel Hero */}
+      <FeaturedCarouselHero
+        items={carouselItems}
+        autoRotateInterval={2000}
+        onItemPress={(itemId) => console.log('[v0] Selected carousel item:', itemId)}
+      />
+    </Animated.View>
+  );
+};
+
+// Standalone Search Bar Component
+const StandaloneSearchBar: React.FC<{
+  onSearchPress: () => void;
+}> = ({ onSearchPress }) => {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -56,45 +118,18 @@ const HeroSection: React.FC<{
   }));
 
   return (
-    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.heroContainer}>
-      <LinearGradient
-        colors={[colors.primary, colors.secondary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.heroGradient}
+    <Animated.View entering={FadeInDown.delay(150)} style={styles.searchBarContainer}>
+      <AnimatedPressable
+        onPress={onSearchPress}
+        onPressIn={() => scale.value = withSpring(0.98)}
+        onPressOut={() => scale.value = withSpring(1)}
+        style={[styles.searchBarInput, animatedStyle]}
       >
-        {/* Decorative circles */}
-        <View style={styles.decorativeCircle1} />
-        <View style={styles.decorativeCircle2} />
-
-        <View style={styles.heroContent}>
-          <Animated.View entering={FadeInDown.delay(200)}>
-            <View style={styles.greetingRow}>
-              <Sparkles size={16} color={colors.black} />
-              <Text variant="caption" color="primary">Good evening</Text>
-            </View>
-            <Text variant="display" color="primary" style={styles.heroTitle}>
-              What are you hungry for?
-            </Text>
-            <Text variant="bodyLarge" color="primary" style={styles.heroSubtitle}>
-              Explore delicious dishes from your favorite restaurants
-            </Text>
-          </Animated.View>
-
-          <AnimatedPressable
-            entering={FadeInDown.delay(300)}
-            onPress={onSearchPress}
-            onPressIn={() => scale.value = withSpring(0.98)}
-            onPressOut={() => scale.value = withSpring(1)}
-            style={[styles.searchBar, animatedStyle]}
-          >
-            <Search size={18} color={colors.textSecondary} />
-            <Text variant="body" color="tertiary" style={styles.searchPlaceholder}>
-              Search products...
-            </Text>
-          </AnimatedPressable>
-        </View>
-      </LinearGradient>
+        <Search size={18} color={colors.textSecondary} />
+        <Text variant="body" color="tertiary" style={styles.searchPlaceholder}>
+          Search products...
+        </Text>
+      </AnimatedPressable>
     </Animated.View>
   );
 };
@@ -196,10 +231,15 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Hero Section */}
+        {/* Hero Section with Carousel */}
         <HeroSection
           onSearchPress={() => navigation.navigate('Search')}
           customerName={customer?.name?.split(' ')[0] || ''}
+        />
+
+        {/* Standalone Search Bar */}
+        <StandaloneSearchBar
+          onSearchPress={() => navigation.navigate('Search')}
         />
 
         {/* Quick Stats */}
@@ -418,61 +458,19 @@ const styles = StyleSheet.create({
   },
 
   // Hero Section
-  heroContainer: {
+  // Hero Section - Carousel
+  heroSection: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.sm,
-    borderRadius: borderRadius['2xl'],
-    overflow: 'hidden',
-    ...shadows.lg,
   },
-  heroGradient: {
-    height: HERO_HEIGHT,
-    padding: spacing.xl,
-    position: 'relative',
-    overflow: 'hidden',
+
+  // Search Bar - Standalone
+  searchBarContainer: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
-  decorativeCircle1: {
-    position: 'absolute',
-    top: -60,
-    right: -30,
-    width: 150,
-    height: 150,
-    borderRadius: borderRadius.full,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  decorativeCircle2: {
-    position: 'absolute',
-    bottom: -40,
-    left: -20,
-    width: 100,
-    height: 100,
-    borderRadius: borderRadius.full,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  heroContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  greetingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xxs,
-    marginBottom: spacing.xs,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: borderRadius.full,
-  },
-  heroTitle: {
-    color: colors.black,
-    marginTop: spacing.xxs,
-  },
-  heroSubtitle: {
-    color: 'rgba(0,0,0,0.7)',
-    marginTop: spacing.xxs,
-  },
-  searchBar: {
+  searchBarInput: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
