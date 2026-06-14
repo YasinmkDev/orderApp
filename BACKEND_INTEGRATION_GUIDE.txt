@@ -1,0 +1,541 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║         BACKEND INTEGRATION GUIDE - CIZARO API & CUSTOMER APP ALIGNMENT       ║
+║                    Complete Backend Architecture Specification                ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+PROJECT STATUS: ARCHITECTURE DESIGNED & READY FOR IMPLEMENTATION
+════════════════════════════════════════════════════════════════════════════════
+
+
+INTRODUCTION
+────────────────────────────────────────────────────────────────────────────────
+
+This document provides a complete guide for implementing the CIZARO backend
+integration with the restaurant customer ordering app. The integration is designed
+to use the CIZARO API endpoints while maintaining graceful fallback to mockData,
+ensuring zero disruption to development and testing.
+
+Backend API: CIZARO v1.3.00
+Documentation Available: https://cizaro.com/api/docs
+Primary Use: Admin panel (we extract customer-facing endpoints)
+
+
+ARCHITECTURE OVERVIEW
+════════════════════════════════════════════════════════════════════════════════
+
+Three-Layer Architecture:
+┌─────────────────────────────────────┐
+│        UI Components/Screens         │ (HomeScreen, ProductDetailScreen, etc.)
+├─────────────────────────────────────┤
+│         Custom React Hooks           │ (useGetItems, useGetItemDetails, etc.)
+├─────────────────────────────────────┤
+│     API Service Layer + apiClient    │ (itemsService, ordersService, fallback)
+├─────────────────────────────────────┤
+│    CIZARO Backend or MockData        │ (Feature flag controls which is used)
+└─────────────────────────────────────┘
+
+Key Benefits:
+✓ Clean separation of concerns
+✓ Easy to test (swap service layer)
+✓ Graceful fallback to mockData
+✓ Zero impact on UI components
+✓ Feature flag for backend enable/disable
+
+
+TYPE SYSTEM UPDATES
+════════════════════════════════════════════════════════════════════════════════
+
+File: src/types/api.ts
+
+Backend DTO Types:
+├── ItemMatrixDTO (for variants/sizes)
+│   ├── matrix_id: UUID
+│   ├── item_id: UUID
+│   ├── matrix_name: string (e.g., "Size", "Type")
+│   ├── matrix_value: string (e.g., "Small", "Large")
+│   ├── price_adjustment: number
+│   └── active: boolean
+│
+├── ModifierDTO (for add-ons)
+│   ├── modifier_id: UUID
+│   ├── modifier_name: string
+│   ├── modifier_price: number
+│   ├── active: boolean
+│   └── category: string (optional)
+│
+├── ItemCategoryDTO (for categories)
+│   ├── category_id: UUID
+│   ├── category_name: string
+│   ├── category_image_url: string
+│   ├── branch_id: UUID
+│   └── active: boolean
+│
+└── Existing Types Extended:
+    ├── Item: Added useMatrix, useModifiers, cost, barcode, stockQuantity
+    ├── Category: Added displayOrder, isActive
+    └── SaleOrder: Added branchId, customerId, estimatedTime
+
+All IDs use UUID format (e.g., "550e8400-e29b-41d4-a716-446655440000")
+
+
+API SERVICE LAYER
+════════════════════════════════════════════════════════════════════════════════
+
+File: src/services/api/apiClient.ts
+Purpose: Base HTTP client with automatic fallback logic
+
+Features:
+• GET/POST methods with configurable timeout (default 10s)
+• Automatic fallback to mockData on failure
+• Feature flag control (REACT_APP_USE_BACKEND env var)
+• Graceful error handling and logging
+• No external dependencies
+
+Usage:
+const data = await apiClient.get('/items/GetById', { id: itemId }, fallbackData);
+
+
+File: src/services/api/itemsService.ts
+Purpose: Product and category API calls
+
+Methods:
+├── getCategories(branchId: string): Promise<Category[]>
+│   → GET /item_categories/GetAllByBranch
+│   → Usage: HomeScreen - Load all categories
+│
+├── getItems(branchId: string, skip?, take?): Promise<Item[]>
+│   → GET /items/GetAllByBranch
+│   → Usage: HomeScreen - Load featured, popular items
+│
+├── getItemDetails(itemId: string): Promise<Item | null>
+│   → GET /items/GetById
+│   → Usage: ProductDetailScreen - Full product info
+│
+├── getItemVariants(itemId: string): Promise<Variant[]>
+│   → GET /item-matrix/GetByItemId
+│   → Usage: ProductDetailScreen - Load size/type options
+│
+├── getItemModifiers(itemId: string): Promise<ModifierGroup[]>
+│   → GET /modifiers/GetByItemId
+│   → Usage: ProductDetailScreen - Load add-on options
+│
+└── searchItems(branchId: string, keyword: string): Promise<Item[]>
+    → GET /items/Search
+    → Usage: SearchScreen - Find products
+
+
+File: src/services/api/ordersService.ts
+Purpose: Order creation and tracking
+
+Methods:
+├── createOrder(order: Partial<SaleOrder>): Promise<SaleOrder | null>
+│   → POST /sale-orders/Add
+│   → Usage: CheckoutScreen - Submit customer order
+│
+├── addOrderLine(orderId: string, line: Partial<SaleOrderLine>): Promise<SaleOrderLine | null>
+│   → POST /sale-order-lines/Add
+│   → Usage: CartScreen - Add items with customizations
+│
+├── getOrderDetails(orderId: string): Promise<SaleOrder | null>
+│   → GET /sale-orders/GetById
+│   → Usage: OrderTrackingScreen - Monitor order
+│
+├── getCustomerOrders(customerId: string): Promise<SaleOrder[]>
+│   → GET /sale-orders/GetByCustomerId
+│   → Usage: OrderHistoryScreen - Show past orders
+│
+├── updateOrderStatus(orderId: string, status: string): Promise<SaleOrder | null>
+│   → POST /sale-orders/UpdateStatus
+│   → Usage: (Admin) Update order status
+│
+└── cancelOrder(orderId: string): Promise<boolean>
+    → POST /sale-orders/Cancel
+    → Usage: CartScreen - Cancel before checkout
+
+
+CUSTOM HOOKS
+════════════════════════════════════════════════════════════════════════════════
+
+File: src/hooks/useGetItems.ts
+
+Hook: useGetItems(branchId: string)
+Returns:
+{
+  items: Item[],           // All products
+  categories: Category[],  // All categories
+  loading: boolean,        // Fetch in progress
+  error: string | null,    // Error message
+  refetch: () => Promise<void>  // Manual refresh
+}
+
+Usage in components:
+const { items, categories, loading } = useGetItems(branchId);
+
+
+File: src/hooks/useGetItemDetails.ts
+
+Hook: useGetItemDetails(itemId: string | null)
+Returns:
+{
+  item: Item | null,                  // Product details
+  variants: Variant[],                // Size/type options
+  modifiers: ModifierGroup[],         // Add-on options
+  loading: boolean,
+  error: string | null,
+  refetch: () => Promise<void>
+}
+
+Usage in components:
+const { item, variants, modifiers, loading } = useGetItemDetails(itemId);
+
+
+File: src/hooks/useCreateOrder.ts
+
+Hook: useCreateOrder()
+Returns:
+{
+  createOrder: (order) => Promise<SaleOrder | null>,
+  loading: boolean,
+  error: string | null,
+  success: boolean
+}
+
+Usage in components:
+const { createOrder, loading } = useCreateOrder();
+const result = await createOrder(orderData);
+
+
+MOCKDATA STRUCTURE
+════════════════════════════════════════════════════════════════════════════════
+
+File: src/data/mockData.ts
+
+Structure:
+├── DEFAULT_BRANCH_ID: UUID (constant branch ID for all data)
+├── mockCustomer: Customer (test user for development)
+├── mockAddresses: CustomerAddress[] (delivery addresses)
+├── mockCategories: Category[] (5 categories)
+├── mockProducts: Item[] (9 products with full backend fields)
+│   ├── Classic Burger (with variants & modifiers)
+│   ├── Margherita Pizza (with variants & modifiers)
+│   └── 7 other items (Stir-Fry, Buddha Bowl, Salmon, etc.)
+└── mockOrders: SaleOrder[] (2 sample orders with order lines)
+
+All data uses:
+• UUID format for IDs
+• Backend field names (item_id → id, item_name → name, etc.)
+• Backend structure (useMatrix, useModifiers, cost, barcode)
+• Proper type alignment with backend DTOs
+
+
+ENDPOINT MAPPING - CUSTOMER FLOW
+════════════════════════════════════════════════════════════════════════════════
+
+1. APP OPENS → HOME SCREEN
+   ┌─ GET /item_categories/GetAllByBranch (branchId)
+   │  Returns: Category[] (All categories with display order)
+   │
+   └─ GET /items/GetAllByBranch (branchId, skip, take)
+      Returns: Item[] (Featured, Popular, Recommended items)
+
+2. USER TAPS PRODUCT → PRODUCT DETAIL SCREEN
+   ┌─ GET /items/GetById (itemId)
+   │  Returns: Item (Full product details)
+   │
+   ├─ GET /item-matrix/GetByItemId (itemId) [IF useMatrix=true]
+   │  Returns: Variant[] (Size/type options)
+   │
+   └─ GET /modifiers/GetByItemId (itemId) [IF useModifiers=true]
+      Returns: ModifierGroup[] (Add-on options organized)
+
+3. USER CUSTOMIZES → CUSTOMIZE COMPONENTS
+   ├─ VariantSelector: Select from variants (local state, no API)
+   └─ ModifierSelector: Select modifiers (local state, no API)
+
+4. USER ADDS TO CART → CART SCREEN
+   └─ Store SaleOrderLineDTO in local state (no API yet)
+
+5. USER ADJUSTS QUANTITIES → CART SCREEN
+   └─ Update local cart state (no API yet)
+
+6. USER CHECKS OUT → CHECKOUT SCREEN
+   └─ POST /sale-orders/Add (SaleOrderDTO with all lines)
+      Returns: SaleOrder (with order_id, total, estimated_time)
+
+7. ORDER CONFIRMATION → ORDER TRACKING SCREEN
+   ├─ GET /sale-orders/GetById (orderId) [On demand]
+   │  Returns: SaleOrder (Current order status)
+   │
+   └─ Poll every 5 seconds while order is "Processing"
+      Updates: Order status, estimated time, preparation details
+
+
+DATA PAYLOAD EXAMPLES
+════════════════════════════════════════════════════════════════════════════════
+
+CREATE ORDER PAYLOAD (POST /sale-orders/Add):
+{
+  "customer_id": "660e8400-e29b-41d4-a716-446655440001",
+  "branch_id": "550e8400-e29b-41d4-a716-446655440000",
+  "order_date": "2024-06-14T19:30:00Z",
+  "order_total": 34.97,
+  "notes": "No onions please",
+  "order_lines": [
+    {
+      "item_id": "220e8400-e29b-41d4-a716-446655440001",
+      "quantity": 1,
+      "unit_price": 16.99,
+      "selected_matrix_id": "330e8400-e29b-41d4-a716-446655440002",
+      "selected_modifiers": [
+        {
+          "modifier_id": "550e8400-e29b-41d4-a716-446655440102",
+          "modifier_price": 0.50
+        }
+      ],
+      "notes": "Extra sauce"
+    }
+  ]
+}
+
+ORDER RESPONSE:
+{
+  "order_id": "880e8400-e29b-41d4-a716-446655440003",
+  "order_number": "ORD-2024-001",
+  "customer_id": "660e8400-e29b-41d4-a716-446655440001",
+  "branch_id": "550e8400-e29b-41d4-a716-446655440000",
+  "order_date": "2024-06-14T19:30:00Z",
+  "order_status": "Pending",
+  "order_total": 34.97,
+  "order_lines": [...]
+}
+
+
+IMPLEMENTATION ROADMAP
+════════════════════════════════════════════════════════════════════════════════
+
+Phase 1: Type System [COMPLETED]
+✓ Update Item, Category, SaleOrder types
+✓ Add backend DTO interfaces
+✓ UUID support across all types
+
+Phase 2: API Service Layer [READY TO IMPLEMENT]
+- Create src/services/api/apiClient.ts
+- Create src/services/api/itemsService.ts
+- Create src/services/api/ordersService.ts
+- Add HTTP methods with fallback logic
+
+Phase 3: Custom Hooks [READY TO IMPLEMENT]
+- Create src/hooks/useGetItems.ts
+- Create src/hooks/useGetItemDetails.ts
+- Create src/hooks/useCreateOrder.ts
+- Export from src/hooks/index.ts
+
+Phase 4: Mock Data Alignment [READY TO IMPLEMENT]
+- Rebuild mockData.ts with UUID format
+- Add backend fields to all products
+- Use proper ItemDTO structure
+- Add mock orders with proper SaleOrderDTO
+
+Phase 5: Screen Integration [READY TO IMPLEMENT]
+- Update HomeScreen to use useGetItems
+- Update ProductDetailScreen to use useGetItemDetails
+- Update CartScreen to build SaleOrderLineDTO
+- Update CheckoutScreen to use useCreateOrder
+
+Phase 6: Feature Flag & Config [READY TO IMPLEMENT]
+- Create src/config/api.ts
+- Add REACT_APP_USE_BACKEND env var
+- Add fallback logic to all hooks
+- Document environment setup
+
+
+FEATURE FLAG CONFIGURATION
+════════════════════════════════════════════════════════════════════════════════
+
+Environment Variables:
+• REACT_APP_API_URL: Backend API base URL (default: https://api.cizaro.com)
+• REACT_APP_USE_BACKEND: Enable backend ("true" or "false", default: false)
+
+Usage:
+Development (with mockData - Default):
+REACT_APP_USE_BACKEND=false
+
+Production (with real backend):
+REACT_APP_USE_BACKEND=true
+REACT_APP_API_URL=https://api.cizaro.com
+
+Switching behavior:
+- If REACT_APP_USE_BACKEND=false: Hooks automatically use mockData
+- If REACT_APP_USE_BACKEND=true: Hooks attempt API call, fallback to mockData on failure
+
+
+GRACEFUL FALLBACK PATTERN
+════════════════════════════════════════════════════════════════════════════════
+
+All API calls follow this pattern:
+
+try {
+  // 1. Check if backend is enabled
+  if (!config.useBackend) {
+    return getMockData(); // Skip API call
+  }
+
+  // 2. Attempt API call with timeout
+  const data = await fetch(endpoint, { timeout: 10000 });
+
+  // 3. Return API result
+  return data;
+
+} catch (error) {
+  // 4. Log warning
+  console.warn('[v0] Backend unavailable, using mockData');
+
+  // 5. Return fallback (mockData)
+  return getMockDataFallback();
+}
+
+Result: App works seamlessly with mockData or real API
+
+
+TESTING STRATEGY
+════════════════════════════════════════════════════════════════════════════════
+
+Development Testing (mockData):
+✓ Run app with REACT_APP_USE_BACKEND=false (default)
+✓ All data comes from mockData.ts
+✓ No network calls made
+✓ Instant response, deterministic testing
+
+Integration Testing (mockData + API structure):
+✓ Verify mockData matches ItemDTO structure
+✓ Check UUID format compliance
+✓ Validate all required backend fields present
+✓ Test price calculations with variants/modifiers
+
+Backend Testing (when API is ready):
+✓ Set REACT_APP_USE_BACKEND=true
+✓ Set REACT_APP_API_URL to staging API
+✓ Test full order creation flow
+✓ Verify data mapping between frontend and backend
+
+Fallback Testing:
+✓ Temporarily disable backend
+✓ Verify graceful fallback to mockData
+✓ Check error logging in console
+✓ Confirm no UI breaks on fallback
+
+
+EXPECTED RESULTS
+════════════════════════════════════════════════════════════════════════════════
+
+With Backend Enabled (REACT_APP_USE_BACKEND=true):
+✓ HomeScreen loads real categories and products
+✓ ProductDetailScreen shows real variants/modifiers
+✓ Checkout submits orders to backend
+✓ OrderTrackingScreen polls real order status
+✓ All data from CIZARO API
+
+With Backend Disabled (REACT_APP_USE_BACKEND=false - Default):
+✓ HomeScreen loads mock categories and products
+✓ ProductDetailScreen shows mock variants/modifiers
+✓ Checkout simulates order submission
+✓ OrderTrackingScreen shows mock order tracking
+✓ All data from mockData.ts
+
+Backend Unavailable (API down but enabled):
+✓ Automatic fallback to mockData
+✓ Warning logged to console
+✓ No errors shown to user
+✓ App continues functioning normally
+
+
+ZERO-IMPACT MIGRATION
+════════════════════════════════════════════════════════════════════════════════
+
+Why this approach is perfect:
+
+1. Development continues with mockData (default)
+   - No breaking changes
+   - No dependency on backend availability
+   - Deterministic testing
+
+2. Backend integration is seamless
+   - One env var enables real API
+   - No code changes needed
+   - Automatic fallback if API fails
+
+3. Production ready
+   - Feature flag for quick disable
+   - Graceful degradation
+   - Logging for debugging
+
+4. UI/UX unchanged
+   - Same components work with both sources
+   - Same screens, same functionality
+   - Same user experience
+
+
+NEXT STEPS
+════════════════════════════════════════════════════════════════════════════════
+
+1. Review this document
+   - Verify API endpoints match backend
+   - Check data structure alignment
+   - Confirm implementation approach
+
+2. Implement Phase 2-6 (as needed)
+   - Create API service layer files
+   - Create custom hooks
+   - Update mockData with backend fields
+   - Integrate with screens
+
+3. Test with mockData first
+   - Verify all screens work
+   - Test variant/modifier functionality
+   - Test order creation flow
+
+4. When backend is ready
+   - Set REACT_APP_USE_BACKEND=true
+   - Update REACT_APP_API_URL
+   - Test full integration
+   - Verify order submission and tracking
+
+5. Deploy to production
+   - Enable backend in production config
+   - Monitor logs for API errors
+   - Verify graceful fallback works
+   - Celebrate successful integration
+
+
+SUMMARY
+════════════════════════════════════════════════════════════════════════════════
+
+This backend integration guide provides:
+
+✓ Complete API endpoint mapping for customer ordering
+✓ Type system aligned with CIZARO backend DTOs
+✓ Service layer architecture with graceful fallback
+✓ Custom hooks for data fetching and ordering
+✓ MockData structure matching backend
+✓ Zero-impact migration strategy
+✓ Feature flag for seamless switching
+✓ Clear implementation roadmap
+
+The architecture ensures:
+✓ Development continues with mockData
+✓ Zero breaking changes
+✓ Seamless backend integration when ready
+✓ Graceful fallback if API is unavailable
+✓ Production-ready infrastructure
+✓ Easy testing and debugging
+
+Status: Ready for implementation - All 6 phases can be executed in any order.
+The app will work perfectly with mockData until backend is deployed, then
+seamlessly switch to real data with a single environment variable.
+
+════════════════════════════════════════════════════════════════════════════════
+Backend Integration Guide - COMPLETE
+Design Specification: FINAL
+Implementation Status: READY
+Next Action: Implement Phase 2-6 (Service Layer, Hooks, MockData, Integration)
+════════════════════════════════════════════════════════════════════════════════
