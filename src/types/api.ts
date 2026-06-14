@@ -16,6 +16,32 @@ export interface LoginResponse {
   expiration?: string;
 }
 
+export interface Variant {
+  id: string;
+  name: string; // e.g., "Small", "Medium", "Large", "Zinger", "Cheese"
+  priceAdjustment?: number; // Additional price for this variant
+  icon?: string; // Optional emoji or icon
+  description?: string; // e.g., "Perfect for one"
+  isDefault?: boolean;
+}
+
+export interface Modifier {
+  id: string;
+  name: string; // e.g., "Extra Cheese", "Mayo", "Sauce"
+  price: number; // Cost of this modifier
+  icon?: string; // Optional emoji or icon
+  category?: string; // e.g., "Sauces", "Toppings", "Extras"
+  isDefault?: boolean;
+}
+
+export interface ModifierGroup {
+  id: string;
+  name: string; // e.g., "Sauce", "Toppings"
+  modifiers: Modifier[];
+  isRequired?: boolean;
+  maxSelections?: number; // 0 = unlimited
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -36,6 +62,9 @@ export interface Item {
   deliveryTime?: number; // in minutes
   rating?: number;
   reviewCount?: number;
+  // Customization fields
+  variants?: Variant[]; // e.g., sizes or types
+  modifierGroups?: ModifierGroup[]; // e.g., sauces, toppings
 }
 
 export interface Category {

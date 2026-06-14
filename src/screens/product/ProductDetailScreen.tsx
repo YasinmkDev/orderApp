@@ -27,6 +27,7 @@ import { Text } from '../../components/ui/Text';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { CustomizationPanel, CustomizationState } from '../../components/ui/CustomizationPanel';
 import { useProduct } from '../../hooks';
 import { useCartStore } from '../../store/cart';
 import { Image } from 'expo-image';
@@ -100,6 +101,7 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const cartItems = useCartStore(s => s.items);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [customization, setCustomization] = useState<CustomizationState | null>(null);
 
   // Animation values
   const scrollY = useSharedValue(0);
@@ -316,6 +318,16 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </Animated.View>
           )}
 
+          {/* Customization Panel */}
+          {(product.variants || product.modifierGroups) && (
+            <CustomizationPanel
+              variants={product.variants}
+              modifierGroups={product.modifierGroups}
+              basePrice={product.price}
+              onCustomizationChange={setCustomization}
+            />
+          )}
+
           {/* Add to Cart Section */}
           <Animated.View entering={FadeInDown.delay(600)} style={styles.addToCartSection}>
             {/* Quantity Selector */}
@@ -338,7 +350,7 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             {/* Add to Cart Button */}
             <Animated.View style={{ flex: 1, transform: [{ scale: buttonScale }] }}>
               <Button
-                title={`Add to Cart — $${(product.price * quantity).toFixed(2)}`}
+                title={`Add to Cart — $${((customization?.totalPrice || product.price) * quantity).toFixed(2)}`}
                 onPress={handleAddToCart}
                 size="lg"
                 fullWidth
