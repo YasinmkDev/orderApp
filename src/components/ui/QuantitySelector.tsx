@@ -1,16 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  FadeIn,
-} from 'react-native-reanimated';
-import { colors, spacing, borderRadius, springs } from '../../theme';
+import { View, StyleSheet } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { colors, spacing, borderRadius } from '../../theme';
 import { Text } from './Text';
 import { Plus, Minus } from 'lucide-react-native';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import AnimatedPressable from './AnimatedPressable';
 
 interface QuantitySelectorProps {
   quantity: number;
@@ -32,37 +26,6 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   const canDecrease = quantity > minQuantity;
   const canIncrease = quantity < maxQuantity;
 
-  const decreaseScale = useSharedValue(1);
-  const increaseScale = useSharedValue(1);
-
-  const decreaseAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: decreaseScale.value }],
-  }));
-
-  const increaseAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: increaseScale.value }],
-  }));
-
-  const handleDecreasePressIn = () => {
-    if (canDecrease) {
-      decreaseScale.value = withSpring(0.9, springs.snappy);
-    }
-  };
-
-  const handleDecreasePressOut = () => {
-    decreaseScale.value = withSpring(1, springs.bouncy);
-  };
-
-  const handleIncreasePressIn = () => {
-    if (canIncrease) {
-      increaseScale.value = withSpring(0.9, springs.snappy);
-    }
-  };
-
-  const handleIncreasePressOut = () => {
-    increaseScale.value = withSpring(1, springs.bouncy);
-  };
-
   const buttonSize = size === 'sm' ? 32 : size === 'lg' ? 48 : 40;
   const iconSize = size === 'sm' ? 14 : size === 'lg' ? 20 : 16;
 
@@ -70,14 +33,12 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
     <Animated.View entering={FadeIn} style={styles.container}>
       <AnimatedPressable
         onPress={onDecrease}
-        onPressIn={handleDecreasePressIn}
-        onPressOut={handleDecreasePressOut}
         disabled={!canDecrease}
+        activeScale={0.9}
         style={[
           styles.button,
           { width: buttonSize, height: buttonSize },
           !canDecrease && styles.disabled,
-          decreaseAnimatedStyle,
         ]}
       >
         <Minus size={iconSize} color={canDecrease ? colors.text : colors.textTertiary} />
@@ -93,15 +54,13 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
 
       <AnimatedPressable
         onPress={onIncrease}
-        onPressIn={handleIncreasePressIn}
-        onPressOut={handleIncreasePressOut}
         disabled={!canIncrease}
+        activeScale={0.9}
         style={[
           styles.button,
           styles.buttonActive,
           { width: buttonSize, height: buttonSize },
           !canIncrease && styles.disabled,
-          increaseAnimatedStyle,
         ]}
       >
         <Plus size={iconSize} color={canIncrease ? colors.black : colors.textTertiary} />

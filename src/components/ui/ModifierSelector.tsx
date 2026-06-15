@@ -32,7 +32,7 @@ export const ModifierSelector: React.FC<ModifierSelectorProps> = ({
           layout={Layout.springify()}
           style={styles.groupContainer}
         >
-          <Text variant="titleSmall" weight="semibold" style={styles.groupTitle}>
+          <Text variant="captionMedium" weight="semibold" style={styles.groupTitle}>
             {group.name}
             {group.isRequired && <Text style={styles.required}> *</Text>}
           </Text>
@@ -44,7 +44,6 @@ export const ModifierSelector: React.FC<ModifierSelectorProps> = ({
               <Animated.View
                 key={modifier.id}
                 entering={FadeInDown.delay(450 + groupIndex * 100 + modifierIndex * 30)}
-                layout={Layout.springify()}
               >
                 <AnimatedPressable
                   onPress={() => onModifierToggle(modifier.id, !isSelected, modifier.price)}
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     backgroundColor: colors.background,
     borderWidth: 1.5,
-    borderColor: colors.gray200,
+    borderColor: colors.border,
     ...shadows.sm,
   },
   modifierItemSelected: {
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: borderRadius.md,
     borderWidth: 2,
-    borderColor: colors.gray300,
+    borderColor: colors.borderStrong,
     justifyContent: 'center',
     alignItems: 'center',
   },

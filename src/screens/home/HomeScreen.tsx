@@ -24,7 +24,6 @@ import Animated, {
 import { theme, colors, spacing, borderRadius, shadows } from '../../theme';
 import { Text } from '../../components/ui/Text';
 import { ProductCard } from '../../components/ui/ProductCard';
-import { CompactProductCard } from '../../components/ui/CompactProductCard';
 import { FeaturedCarouselHero } from '../../components/ui/FeaturedCarouselHero';
 import { HomeScreenSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';

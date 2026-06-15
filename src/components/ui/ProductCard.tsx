@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  interpolate,
-  withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import AnimatedPressable from './AnimatedPressable';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, borderRadius, spacing, shadows, springs } from '../../theme';
 import { Text } from './Text';
@@ -34,8 +33,6 @@ interface ProductCardProps {
   deliveryTime?: number;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export const ProductCard: React.FC<ProductCardProps> = ({
   id,
   name,
@@ -53,7 +50,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   dietaryTags,
   deliveryTime,
 }) => {
-  const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
   const imageScale = useSharedValue(0.95);
 
@@ -63,7 +59,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   }, []);
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
@@ -71,26 +66,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     transform: [{ scale: imageScale.value }],
   }));
 
-  const handlePressIn = () => {
-    scale.value = withSpring(0.96, springs.snappy);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, springs.bouncy);
-  };
-
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
   const isFood = restaurantName !== undefined;
 
   return (
     <AnimatedPressable
       onPress={() => onPress(id)}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      style={[
-        styles.container,
-        animatedContainerStyle,
-      ]}
+      style={[styles.container, animatedContainerStyle]}
     >
       {/* Image Section */}
       <View style={styles.imageWrapper}>
@@ -125,7 +107,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {isFood && deliveryTime !== undefined && (
           <View style={styles.deliveryTimeBadge}>
             <Clock size={12} color={colors.white} />
-            <Text variant="captionSmall" color="white" weight="semibold">
+            <Text variant="captionSmall" color="primary" weight="semibold">
               {deliveryTime}m
             </Text>
           </View>

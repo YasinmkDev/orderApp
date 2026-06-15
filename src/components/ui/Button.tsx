@@ -1,20 +1,13 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
-  Pressable,
 } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-} from 'react-native-reanimated';
-import { colors, typography, borderRadius, spacing, springs } from '../../theme';
+import { colors, typography, borderRadius, spacing } from '../../theme';
 import { Text } from './Text';
+import AnimatedPressable from './AnimatedPressable';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -33,8 +26,6 @@ interface ButtonProps {
   textStyle?: TextStyle;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
@@ -48,20 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
-  const scale = useSharedValue(1);
   const isDisabled = disabled || loading;
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.96, springs.snappy);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, springs.snappy);
-  };
 
   const getBackgroundColor = (): string => {
     if (isDisabled) return colors.surfaceElevated;
@@ -119,12 +97,9 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <AnimatedPressable
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       disabled={isDisabled}
       style={[
         styles.base,
-        animatedStyle,
         {
           backgroundColor,
           paddingVertical: sizeStyles.paddingVertical,
@@ -156,7 +131,6 @@ export const Button: React.FC<ButtonProps> = ({
     </AnimatedPressable>
   );
 };
-
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
@@ -177,3 +151,5 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
+

@@ -86,7 +86,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
     <Animated.View entering={FadeIn.delay(500)} layout={Layout.springify()} style={styles.container}>
       {/* Header with juicy design */}
       <View style={styles.headerGradient}>
-        <Text variant="headlineMedium" weight="bold" style={styles.headerTitle}>
+        <Text variant="heading" weight="bold" style={styles.headerTitle}>
           Customize Your Order
         </Text>
         <Text variant="body" style={styles.headerSubtitle}>
@@ -159,7 +159,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
           <Text variant="titleMedium" weight="bold" style={styles.totalLabel}>
             Total
           </Text>
-          <Text variant="headlineSmall" weight="bold" style={styles.totalPrice}>
+          <Text variant="headingLarge" weight="bold" style={styles.totalPrice}>
             ${totalPrice.toFixed(2)}
           </Text>
         </View>
@@ -190,13 +190,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   content: {
-    paddingHorizontal: spacing.lg,
+    // paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
     backgroundColor: colors.background,
   },
   priceCard: {
-    marginHorizontal: spacing.lg,
+    // marginHorizontal: spacing.lg,
     marginBottom: 0,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.lg,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: borderRadius.xl,
     backgroundColor: 'rgba(255, 100, 50, 0.08)',
     borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    borderTopColor: colors.border,
   },
   priceRow: {
     flexDirection: 'row',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.gray200,
+    backgroundColor: colors.border,
     marginVertical: spacing.md,
   },
   totalLabel: {

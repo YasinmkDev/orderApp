@@ -13,21 +13,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withTiming,
   interpolate,
   Extrapolation,
   FadeIn,
   FadeInDown,
-  FadeInUp,
-  runOnJS,
 } from 'react-native-reanimated';
-import { theme, colors, spacing, borderRadius, shadows, springs } from '../../theme';
+import { colors, spacing, borderRadius, shadows } from '../../theme';
 import { Text } from '../../components/ui/Text';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 import { LoadingState } from '../../components/ui/LoadingState';
 import { CustomizationPanel, CustomizationState } from '../../components/ui/CustomizationPanel';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useProduct } from '../../hooks';
 import { useCartStore } from '../../store/cart';
 import { Image } from 'expo-image';
@@ -38,13 +34,11 @@ import {
   Minus,
   Plus,
   ShoppingCart,
-  ChevronRight,
   Truck,
   Shield,
   RotateCcw,
   Star,
   Package,
-  Clock,
 } from 'lucide-react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../navigation/types';
@@ -55,9 +49,6 @@ interface Props {
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Animated Button Component
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // Rating Stars Component
 const RatingStars: React.FC<{ rating: number; size?: number }> = ({ rating, size = 16 }) => (
@@ -105,9 +96,6 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // Animation values
   const scrollY = useSharedValue(0);
-  const imageScale = useSharedValue(1);
-  const buttonScale = useSharedValue(1);
-  const cartBadgeScale = useSharedValue(1);
 
   // Check if product is already in cart
   const inCartQuantity = useMemo(() => {
@@ -139,15 +127,7 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   });
 
   const handleAddToCart = useCallback(() => {
-    if (product) {
-      addItem(product, quantity);
-      buttonScale.value = withSpring(0.9, springs.snappy, () => {
-        buttonScale.value = withSpring(1, springs.bouncy);
-        cartBadgeScale.value = withSpring(1.3, springs.bouncy, () => {
-          cartBadgeScale.value = withSpring(1);
-        });
-      });
-    }
+    if (product) addItem(product, quantity);
   }, [product, quantity]);
 
   const handleQuantityChange = useCallback((delta: number) => {
@@ -348,7 +328,7 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
 
             {/* Add to Cart Button */}
-            <Animated.View style={{ flex: 1, transform: [{ scale: buttonScale }] }}>
+            <View style={{ flex: 1 }}>
               <Button
                 title={`Add to Cart — $${((customization?.totalPrice || product.price) * quantity).toFixed(2)}`}
                 onPress={handleAddToCart}
@@ -356,7 +336,7 @@ export const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                 fullWidth
                 leftIcon={<ShoppingCart size={20} color={colors.black} />}
               />
-            </Animated.View>
+            </View>
           </Animated.View>
 
           {/* Cart Status */}

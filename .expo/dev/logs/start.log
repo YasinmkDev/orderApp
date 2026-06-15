@@ -584,3 +584,75 @@
 {"_e":"metro:client_log","_t":1781333457310,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
 {"_e":"metro:client_log","_t":1781333457366,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
 {"_e":"metro:client_log","_t":1781333457366,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:server_log","_t":1781334378672,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","host.exp.exponent","2404ARN45A - 16 - API 36","60"]}
+{"_e":"metro:bundling:started","_t":1781337771451,"id":"m","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781337771451,"id":"m","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781337771456,"id":"m","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781337771614,"id":"m","total":1,"ms":163.3523}
+{"_e":"metro:client_log","_t":1781337825518,"level":"warn","data":["Require cycle: src/services/api.ts -> src/store/auth.ts -> src/services/auth.ts -> src/services/api.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle."]}
+{"_e":"metro:client_log","_t":1781337825519,"level":"warn","data":["Require cycle: src/services/api.ts -> src/store/auth.ts -> src/services/customers.ts -> src/services/api.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle."]}
+{"_e":"metro:client_log","_t":1781337832558,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832726,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832804,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832891,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832892,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832892,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337832892,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847979,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847979,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847979,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847979,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847998,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847999,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"metro:client_log","_t":1781337847999,"level":"warn","data":["[Reanimated] Property \"transform\" of AnimatedComponent(Pressable) may be overwritten by a layout animation. Please wrap your component with an animated view and apply the layout animation on the wrapper."]}
+{"_e":"root:init","_t":1781499726062,"format":"v0-jsonl","version":"56.1.15"}
+{"_e":"env:mode","_t":1781499726069,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1781499726086,"mode":"development","files":["../..\\..\\.env"],"env":{"EXPO_PUBLIC_SUPABASE_ANON_KEY":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oemdra3ltd2licmNmaG9kc29xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNzI4MzMsImV4cCI6MjA5NjY0ODgzM30.cYIVSkOnEYCu-7quPUiGdoCRdXizSohy9oDb2wQjIt8","EXPO_PUBLIC_SUPABASE_URL":"https://nhzgkkymwibrcfhodsoq.supabase.co","VITE_SUPABASE_ANON_KEY":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJib2x0IiwicmVmIjoiMGVjOTBiNTdkNmU5NWZjYmRhMTk4MzJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4ODE1NzQsImV4cCI6MTc1ODg4MTU3NH0.9I8-U0x86Ak8t2DGaIk0HfvTSLsAyzdnz-Nw00mMkKw","VITE_SUPABASE_URL":"https://0ec90b57d6e95fcbda19832f.supabase.co"}}
+{"_e":"devserver:start","_t":1781499735385,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1781499738860,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1781499765588,"atlas":false,"workers":3,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1781499797143,"id":"3","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781499797144,"id":"3","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781499797152,"id":"3","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781499797252,"id":"3","progress":0.00738525390625,"total":128,"current":11}
+{"_e":"metro:bundling:progress","_t":1781499797353,"id":"3","progress":0.00738525390625,"total":250,"current":20}
+{"_e":"metro:bundling:progress","_t":1781499797452,"id":"3","progress":0.08064913609769901,"total":331,"current":94}
+{"_e":"metro:bundling:progress","_t":1781499797554,"id":"3","progress":0.22076322284222494,"total":481,"current":226}
+{"_e":"metro:bundling:progress","_t":1781499797654,"id":"3","progress":0.2633073754527805,"total":571,"current":293}
+{"_e":"metro:bundling:progress","_t":1781499797754,"id":"3","progress":0.3143773597514117,"total":692,"current":388}
+{"_e":"metro:bundling:progress","_t":1781499797884,"id":"3","progress":0.35437855357317904,"total":808,"current":481}
+{"_e":"metro:bundling:progress","_t":1781499800401,"id":"3","progress":0.39360685941043083,"total":840,"current":527}
+{"_e":"metro:bundling:progress","_t":1781499800501,"id":"3","progress":0.44545742290668894,"total":878,"current":586}
+{"_e":"metro:bundling:progress","_t":1781499800602,"id":"3","progress":0.6157772342217809,"total":929,"current":729}
+{"_e":"metro:bundling:progress","_t":1781499800706,"id":"3","progress":0.6157772342217809,"total":1071,"current":812}
+{"_e":"metro:bundling:progress","_t":1781499800837,"id":"3","progress":0.6157772342217809,"total":1081,"current":832}
+{"_e":"metro:bundling:progress","_t":1781499801037,"id":"3","progress":0.6157772342217809,"total":1082,"current":832}
+{"_e":"metro:bundling:progress","_t":1781499801297,"id":"3","progress":0.6157772342217809,"total":2797,"current":832}
+{"_e":"metro:bundling:progress","_t":1781499801626,"id":"3","progress":0.6157772342217809,"total":2797,"current":833}
+{"_e":"metro:bundling:progress","_t":1781499801753,"id":"3","progress":0.6157772342217809,"total":2825,"current":881}
+{"_e":"metro:bundling:progress","_t":1781499801890,"id":"3","progress":0.6157772342217809,"total":2912,"current":987}
+{"_e":"metro:bundling:progress","_t":1781499801989,"id":"3","progress":0.6157772342217809,"total":2938,"current":1053}
+{"_e":"metro:bundling:progress","_t":1781499802119,"id":"3","progress":0.6157772342217809,"total":2962,"current":1074}
+{"_e":"metro:bundling:progress","_t":1781499802219,"id":"3","progress":0.6157772342217809,"total":2966,"current":1308}
+{"_e":"metro:bundling:progress","_t":1781499802319,"id":"3","progress":0.6157772342217809,"total":2966,"current":1613}
+{"_e":"metro:bundling:progress","_t":1781499802510,"id":"3","progress":0.6157772342217809,"total":2966,"current":1968}
+{"_e":"metro:bundling:progress","_t":1781499802518,"id":"3","progress":0.6157772342217809,"total":2966,"current":1969}
+{"_e":"metro:bundling:progress","_t":1781499802618,"id":"3","progress":0.6673667035119077,"total":2966,"current":2423}
+{"_e":"metro:bundling:progress","_t":1781499802718,"id":"3","progress":0.8409990683352666,"total":2966,"current":2720}
+{"_e":"metro:bundling:progress","_t":1781499802852,"id":"3","progress":0.8837645313878432,"total":2971,"current":2793}
+{"_e":"metro:bundling:progress","_t":1781499802986,"id":"3","progress":0.8850306695226525,"total":2971,"current":2795}
+{"_e":"metro:bundling:progress","_t":1781499803105,"id":"3","progress":0.8850306695226525,"total":3009,"current":2823}
+{"_e":"metro:bundling:progress","_t":1781499803205,"id":"3","progress":0.8939628440101167,"total":3064,"current":2897}
+{"_e":"metro:bundling:progress","_t":1781499803305,"id":"3","progress":0.9136928286367726,"total":3082,"current":2946}
+{"_e":"metro:bundling:progress","_t":1781499803414,"id":"3","progress":0.9184543350611257,"total":3098,"current":2969}
+{"_e":"metro:bundling:progress","_t":1781499803515,"id":"3","progress":0.935023252598971,"total":3118,"current":3015}
+{"_e":"metro:bundling:progress","_t":1781499803629,"id":"3","progress":0.9499611153156893,"total":3157,"current":3077}
+{"_e":"metro:bundling:progress","_t":1781499803733,"id":"3","progress":0.9502875535511803,"total":3178,"current":3098}
+{"_e":"metro:bundling:progress","_t":1781499803985,"id":"3","progress":0.9509011371048837,"total":3178,"current":3099}
+{"_e":"metro:bundling:progress","_t":1781499804084,"id":"3","progress":0.9612999625944376,"total":3224,"current":3161}
+{"_e":"metro:bundling:progress","_t":1781499804188,"id":"3","progress":0.9612999625944376,"total":3350,"current":3196}
+{"_e":"metro:bundling:progress","_t":1781499804288,"id":"3","progress":0.9612999625944376,"total":3411,"current":3321}
+{"_e":"metro:bundling:progress","_t":1781499804388,"id":"3","progress":0.974872506275598,"total":3480,"current":3436}
+{"_e":"metro:bundling:progress","_t":1781499804488,"id":"3","progress":0.986896595042343,"total":3499,"current":3476}
+{"_e":"metro:bundling:progress","_t":1781499804588,"id":"3","progress":0.999,"total":3509,"current":3508}
+{"_e":"metro:bundling:failed","_t":1781499804592,"id":"3","message":"Unable to resolve \"./AnimatedPressable\" from \"src\\components\\ui\\ModifierSelector.tsx\"\n   5 | import { colors, spacing, borderRadius, shadows } from '../../theme';\n   6 | import { ModifierGroup, Modifier } from '../../types/api';\n>  7 | import AnimatedPressable from './AnimatedPressable';\n     |                                ^\n   8 |\n   9 | interface ModifierSelectorProps {\n  10 |   modifierGroups: ModifierGroup[];","importStack":"\u001b[1mImport stack:\u001b[22m\n\n\u001b[90m \u001b[39msrc\\components\\ui\\ModifierSelector.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./AnimatedPressable\"\u001b[39m\n\n\u001b[90m \u001b[39msrc\\components\\ui\\CustomizationPanel.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./ModifierSelector\"\u001b[39m\n\n\u001b[90m \u001b[39msrc\\screens\\product\\ProductDetailScreen.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"../../components/ui/CustomizationPanel\"\u001b[39m\n\n\u001b[90m \u001b[39msrc\\navigation\\HomeStack.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"../screens/product/ProductDetailScreen\"\u001b[39m\n\n\u001b[90m \u001b[39msrc\\navigation\\MainTabs.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./HomeStack\"\u001b[39m\n\n\u001b[90m \u001b[39msrc\\navigation\\RootNavigator.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./MainTabs\"\u001b[39m\n\n\u001b[90m \u001b[39mApp.tsx\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./src/navigation/RootNavigator\"\u001b[39m\n\n\u001b[90m \u001b[39mindex.ts\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./App\"\u001b[39m\n\n\u001b[90m \u001b[39m\n\u001b[90m |\u001b[39m \u001b[36mimport\u001b[39m \u001b[32m\"./index.ts\"\u001b[39m\n","filename":null,"targetModuleName":"./AnimatedPressable","originModulePath":"src\\components\\ui\\ModifierSelector.tsx"}

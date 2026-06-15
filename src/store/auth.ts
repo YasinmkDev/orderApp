@@ -1,9 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from '../services/auth';
 import { LoginRequest, Customer } from '../types';
-import { customersService } from '../services/customers';
 import { mockCustomer } from '../data/mockData';
 
 const USE_MOCK = true;
@@ -36,6 +34,7 @@ export const useAuthStore = create<AuthState>()(
         }
         set({ isLoading: true, error: null });
         try {
+          const { authService } = await import('../services/auth');
           const response = await authService.login(credentials);
           set({ token: response.token, userId: response.id || credentials.username, isLoading: false });
           await get().fetchCustomer();
@@ -57,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
         const { userId } = get();
         if (!userId) return;
         try {
+          const { customersService } = await import('../services/customers');
           const customer = await customersService.getById(userId);
           set({ customer });
         } catch {

@@ -41,7 +41,6 @@ export const VariantSelector: React.FC<VariantSelectorProps> = ({
             <Animated.View
               key={variant.id}
               entering={FadeInDown.delay(300 + index * 50)}
-              layout={Layout.springify()}
             >
               <AnimatedPressable
                 onPress={() => onVariantSelect(variant.id, priceAdjustment)}
@@ -62,7 +61,7 @@ export const VariantSelector: React.FC<VariantSelectorProps> = ({
 
                 {/* Variant name */}
                 <Text
-                  variant="titleSmall"
+                  variant="captionMedium"
                   weight="bold"
                   style={[
                     styles.variantName,
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     backgroundColor: colors.background,
     borderWidth: 2,
-    borderColor: colors.gray200,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'flex-start',
     ...shadows.sm,
