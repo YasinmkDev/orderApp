@@ -1,0 +1,717 @@
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Dimensions,
+  FlatList,
+  RefreshControl,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  interpolate,
+  Extrapolation,
+  FadeIn,
+  FadeInDown,
+  FadeInRight,
+  Layout,
+} from 'react-native-reanimated';
+import { theme, colors, spacing, borderRadius, shadows } from '../../theme';
+import { Text } from '../../components/ui/Text';
+import { ProductCard } from '../../components/ui/ProductCard';
+import { FeaturedCarouselHero } from '../../components/ui/FeaturedCarouselHero';
+import { HomeScreenSkeleton } from '../../components/ui/Skeleton';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { useProducts, useCategories } from '../../hooks';
+import { useCartStore } from '../../store/cart';
+import { useAuthStore } from '../../store/auth';
+import { Search, ShoppingBag, Bell, ChevronRight, Sparkles, TrendingUp, Clock, Star } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../../navigation/types';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const HERO_HEIGHT = 280;
+
+interface Props {
+  navigation: NativeStackNavigationProp<HomeStackParamList>;
+}
+
+// Animated components
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// Hero Section Component - Carousel-based
+const HeroSection: React.FC<{
+  onSearchPress: () => void;
+  customerName: string;
+}> = ({ onSearchPress, customerName }) => {
+  // Default carousel items
+  const carouselItems = [
+    {
+      id: 'hero-1',
+      image: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Trattoria Roma',
+      dishName: 'Spicy Thai Basil',
+      rating: 4.8,
+      reviewCount: 342,
+      deliveryTime: 25,
+      tags: ['Spicy', 'Popular'],
+    },
+    {
+      id: 'hero-2',
+      image: 'https://images.pexels.com/photos/2082063/pexels-photo-2082063.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Pasta Paradise',
+      dishName: 'Margherita Pizza',
+      rating: 4.9,
+      reviewCount: 521,
+      deliveryTime: 30,
+      tags: ['Vegetarian', 'Fresh'],
+    },
+    {
+      id: 'hero-3',
+      image: 'https://images.pexels.com/photos/821365/pexels-photo-821365.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Green Haven',
+      dishName: 'Buddha Bowl',
+      rating: 4.7,
+      reviewCount: 218,
+      deliveryTime: 20,
+      tags: ['Vegan', 'Healthy'],
+    },
+    {
+      id: 'hero-4',
+      image: 'https://images.pexels.com/photos/3535149/pexels-photo-3535149.jpeg?auto=compress&cs=tinysrgb&w=600',
+      restaurantName: 'Ocean Blue',
+      dishName: 'Grilled Salmon',
+      rating: 4.9,
+      reviewCount: 467,
+      deliveryTime: 35,
+      tags: ['Premium', 'Fresh'],
+    },
+  ];
+
+  return (
+    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.heroSection}>
+      {/* Featured Carousel Hero */}
+      <FeaturedCarouselHero
+        items={carouselItems}
+        autoRotateInterval={2000}
+        onItemPress={(itemId) => console.log('[v0] Selected carousel item:', itemId)}
+      />
+    </Animated.View>
+  );
+};
+
+// Standalone Search Bar Component
+const StandaloneSearchBar: React.FC<{
+  onSearchPress: () => void;
+}> = ({ onSearchPress }) => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View entering={FadeInDown.delay(150)} style={styles.searchBarContainer}>
+      <AnimatedPressable
+        onPress={onSearchPress}
+        onPressIn={() => scale.value = withSpring(0.98)}
+        onPressOut={() => scale.value = withSpring(1)}
+        style={[styles.searchBarInput, animatedStyle]}
+      >
+        <Search size={18} color={colors.textSecondary} />
+        <Text variant="body" color="tertiary" style={styles.searchPlaceholder}>
+          Search products...
+        </Text>
+      </AnimatedPressable>
+    </Animated.View>
+  );
+};
+
+// Category Chip Component
+const CategoryChip: React.FC<{
+  category: { id: string; name: string; image?: string; itemCount?: number };
+  onPress: () => void;
+  index: number;
+}> = ({ category, onPress, index }) => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  // Create customized visual color themes based on the food category type
+  const getCategoryTheme = (id: string) => {
+    switch (id) {
+      case 'cat-1': return { color: '#FF7E36', bgLight: 'rgba(255,126,54,0.08)' }; // Main Courses
+      case 'cat-2': return { color: '#36D19E', bgLight: 'rgba(54,209,158,0.08)' }; // Breakfast
+      case 'cat-3': return { color: '#2EB5FF', bgLight: 'rgba(46,181,255,0.08)' }; // Salads
+      case 'cat-4': return { color: '#E536FF', bgLight: 'rgba(229,54,255,0.08)' }; // Desserts
+      case 'cat-5': return { color: '#FFA836', bgLight: 'rgba(255,168,54,0.08)' }; // Beverages
+      default: return { color: '#F5A623', bgLight: 'rgba(245,166,35,0.08)' };
+    }
+  };
+
+  const theme = getCategoryTheme(category.id);
+
+  return (
+    <AnimatedPressable
+      entering={FadeInRight.delay(100 + index * 50).springify()}
+      onPress={onPress}
+      onPressIn={() => scale.value = withSpring(0.95)}
+      onPressOut={() => scale.value = withSpring(1)}
+      style={[styles.categoryCard, animatedStyle]}
+    >
+      <View style={styles.categoryImgContainer}>
+        {category.image ? (
+          <Image source={{ uri: category.image }} style={styles.categoryCardImg} contentFit="cover" />
+        ) : (
+          <View style={styles.categoryPlaceholderBox}>
+            <Text variant="titleMedium" color="brand">{category.name.charAt(0)}</Text>
+          </View>
+        )}
+        
+        {/* Absolutely positioned luxurious design highlight */}
+        <View style={styles.categoryItemBadge}>
+          <Text variant="captionSmall" weight="bold" style={[styles.badgeMiniText, { color: '#FFF' }]}>
+            {category.itemCount || 0}
+          </Text>
+        </View>
+
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.55)']}
+          style={styles.categoryCardGradient}
+        />
+      </View>
+
+      <View style={styles.categoryCardDetails}>
+        <Text numberOfLines={1} variant="caption" weight="bold" style={styles.categoryCardName}>
+          {category.name}
+        </Text>
+        <View style={styles.categoryArrowWrapper}>
+          <Text numberOfLines={1} variant="captionSmall" color="tertiary" style={styles.categoryCardLabel}>
+            Explore
+          </Text>
+          <View style={[styles.arrowPillIcon, { backgroundColor: theme.bgLight }]}>
+            <ChevronRight size={10} color={theme.color} strokeWidth={3} />
+          </View>
+        </View>
+      </View>
+    </AnimatedPressable>
+  );
+};
+
+// Section Header Component
+const SectionHeader: React.FC<{
+  title: string;
+  subtitle?: string;
+  action?: { label: string; onPress: () => void };
+  icon?: React.ReactNode;
+}> = ({ title, subtitle, action, icon }) => (
+  <View style={styles.sectionHeader}>
+    <View style={styles.sectionHeaderLeft}>
+      {icon}
+      <View>
+        <Text variant="headingLarge">{title}</Text>
+        {subtitle && (
+          <Text variant="caption" color="secondary">{subtitle}</Text>
+        )}
+      </View>
+    </View>
+    {action && (
+      <Pressable onPress={action.onPress} style={styles.seeAllButton}>
+        <Text variant="caption" color="brand">{action.label}</Text>
+        <ChevronRight size={16} color={colors.primary} />
+      </Pressable>
+    )}
+  </View>
+);
+
+export const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const { data: products, isLoading: productsLoading, refetch: refetchProducts } = useProducts();
+  const { data: categories, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
+  const customer = useAuthStore(s => s.customer);
+  const cartItemCount = useCartStore(s => s.getItemCount());
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchProducts(),
+        refetchCategories(),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing home data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchProducts, refetchCategories]);
+
+  const handleProductPress = useCallback(
+    (id: string) => navigation.navigate('ProductDetail', { productId: id }),
+    [navigation],
+  );
+
+  const featuredProducts = products?.filter(p => p.isFeatured) || [];
+  const popularProducts = products?.slice(0, 10) || [];
+  const recommendedProducts = products?.slice(6, 16) || [];
+
+  if (productsLoading && categoriesLoading) {
+    return <HomeScreenSkeleton />;
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+      >
+        {/* Hero Section with Carousel */}
+        <HeroSection
+          onSearchPress={() => navigation.navigate('Search')}
+          customerName={customer?.name?.split(' ')[0] || ''}
+        />
+
+        {/* Standalone Search Bar */}
+        <StandaloneSearchBar
+          onSearchPress={() => navigation.navigate('Search')}
+        />
+
+        {/* Quick Stats */}
+        <Animated.View entering={FadeInDown.delay(400)} style={styles.quickStats}>
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: colors.primaryLight }]}>
+              <TrendingUp size={18} color={colors.primary} />
+            </View>
+            <View>
+              <Text variant="bodySmall" weight="semibold">24</Text>
+              <Text variant="captionSmall" color="tertiary">Trending</Text>
+            </View>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: colors.successLight }]}>
+              <Clock size={18} color={colors.success} />
+            </View>
+            <View>
+              <Text variant="bodySmall" weight="semibold">2-3h</Text>
+              <Text variant="captionSmall" color="tertiary">Delivery</Text>
+            </View>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: colors.secondaryLight }]}>
+              <Star size={18} color={colors.secondary} />
+            </View>
+            <View>
+              <Text variant="bodySmall" weight="semibold">4.9</Text>
+              <Text variant="captionSmall" color="tertiary">Rating</Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Categories */}
+        {categories && categories.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(500)} style={styles.section}>
+            <SectionHeader
+              title="Categories"
+              subtitle="Browse by category"
+              action={{ label: 'See all', onPress: () => navigation.navigate('CategoryDetail', { categoryId: 'all', categoryName: 'All Specialties' }) }}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesScroll}
+            >
+              {categories.map((cat, index) => (
+                <CategoryChip
+                  key={cat.id}
+                  category={cat}
+                  onPress={() => navigation.navigate('CategoryDetail', { categoryId: cat.id, categoryName: cat.name })}
+                  index={index}
+                />
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* Featured Products */}
+        {featuredProducts.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(600)} style={styles.section}>
+            <SectionHeader
+              title="Featured"
+              subtitle="Hand-picked for you"
+              action={{ label: 'View all', onPress: () => navigation.navigate('CategoryDetail', { categoryId: 'all', categoryName: 'Featured Specialties' }) }}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsScroll}
+              decelerationRate="fast"
+              snapToInterval={185}
+            >
+              {featuredProducts.map((product, index) => (
+                <Animated.View
+                  key={product.id}
+                  entering={FadeInRight.delay(index * 100)}
+                  layout={Layout.springify()}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    imageUri={product.image}
+                    category={product.categoryName}
+                    isFeatured={product.isFeatured}
+                    rating={product.rating || 4.5 + Math.random() * 0.4}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 200) + 50}
+                    onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
+                  />
+                </Animated.View>
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* Popular Products Grid */}
+        {popularProducts.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(700)} style={styles.section}>
+            <SectionHeader
+              title="Popular Right Now"
+              subtitle="Best sellers this week"
+            />
+            <View style={styles.productGrid}>
+              {popularProducts.slice(0, 6).map((product, index) => (
+                <Animated.View
+                  key={product.id}
+                  entering={FadeInRight.delay(index * 50)}
+                  style={styles.gridItem}
+                  layout={Layout.springify()}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    imageUri={product.image}
+                    category={product.categoryName}
+                    rating={product.rating || 4.3 + Math.random() * 0.6}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 150) + 30}
+                    onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
+                    width="100%"
+                  />
+                </Animated.View>
+              ))}
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Recommended */}
+        {recommendedProducts.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(800)} style={styles.section}>
+            <SectionHeader
+              title="Recommended"
+              subtitle="Based on your preferences"
+              action={{ label: 'See more', onPress: () => navigation.navigate('CategoryDetail', { categoryId: 'all', categoryName: 'Recommended Dishes' }) }}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsScroll}
+            >
+              {recommendedProducts.map((product, index) => (
+                <Animated.View
+                  key={product.id}
+                  entering={FadeInRight.delay(index * 50)}
+                  layout={Layout.springify()}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    imageUri={product.image}
+                    category={product.categoryName}
+                    rating={product.rating || 4.2 + Math.random() * 0.7}
+                    reviewCount={product.reviewCount || Math.floor(Math.random() * 100) + 20}
+                    onPress={handleProductPress}
+                    restaurantName={product.restaurantName}
+                    shortDescription={product.shortDescription}
+                    dietaryTags={product.dietaryTags}
+                    deliveryTime={product.deliveryTime}
+                  />
+                </Animated.View>
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* Bottom padding for tab bar */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+
+      {/* Floating Cart Button */}
+      {cartItemCount > 0 && (
+        <Animated.View entering={FadeInDown.delay(500)} style={styles.floatingCart}>
+          <Pressable
+            onPress={() => navigation.getParent()?.navigate('CartTab')}
+            style={styles.floatingCartButton}
+          >
+            <LinearGradient
+              colors={[colors.primary, colors.secondary]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.floatingCartGradient}
+            >
+              <ShoppingBag size={20} color={colors.black} />
+              <Text variant="captionMedium" weight="semibold" color="primary">
+                {cartItemCount} items
+              </Text>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
+      )}
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  // Hero Section
+  // Hero Section - Carousel
+  heroSection: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+  },
+
+  // Search Bar - Standalone
+  searchBarContainer: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+  },
+  searchBarInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing.md,
+    height: 50,
+    ...shadows.md,
+  },
+  searchPlaceholder: {
+    flex: 1,
+  },
+
+  // Quick Stats
+  quickStats: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
+  },
+  statItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  statIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.sm,
+  },
+
+  // Sections
+  section: {
+    marginTop: spacing['3xl'],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+  },
+
+  // Categories
+  categoriesScroll: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  categoryCard: {
+    width: 115,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 6,
+    ...shadows.md,
+  },
+  categoryImgContainer: {
+    width: '100%',
+    height: 85,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+    position: 'relative',
+  },
+  categoryCardImg: {
+    width: '100%',
+    height: '100%',
+  },
+  categoryPlaceholderBox: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryLight,
+  },
+  categoryItemBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 2,
+  },
+  badgeMiniText: {
+    fontSize: 9,
+    letterSpacing: 0.2,
+  },
+  categoryCardGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 35,
+    zIndex: 1,
+  },
+  categoryCardDetails: {
+    marginTop: spacing.xs,
+    paddingHorizontal: 2,
+    gap: 2,
+  },
+  categoryCardName: {
+    fontSize: 12,
+    color: colors.white,
+  },
+  categoryArrowWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  categoryCardLabel: {
+    fontSize: 10,
+    letterSpacing: 0.3,
+  },
+  arrowPillIcon: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Products
+  productsScroll: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  productGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  gridItem: {
+    width: (SCREEN_WIDTH - spacing.lg * 2 - spacing.md) / 2,
+  },
+
+  // Floating Cart
+  floatingCart: {
+    position: 'absolute',
+    bottom: 90,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  floatingCartButton: {
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    ...shadows.xl,
+  },
+  floatingCartGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+
+  bottomPadding: {
+    height: 120,
+  },
+});
